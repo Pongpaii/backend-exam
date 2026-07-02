@@ -2,8 +2,6 @@ require('dotenv').config();
 const { Client } = require('pg');
 
 async function main() {
-  console.log('เริ่มต้นการ Seed ข้อมูลตรงสู่ฐานข้อมูล...');
-
   const client = new Client({
     connectionString: "postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
   });
@@ -11,7 +9,6 @@ async function main() {
   await client.connect();
 
   try {
-   
     await client.query(`
       CREATE TABLE IF NOT EXISTS "User" (
         id SERIAL PRIMARY KEY, username VARCHAR(255) UNIQUE NOT NULL, email VARCHAR(255) UNIQUE NOT NULL,
@@ -37,11 +34,8 @@ async function main() {
         "currencyId" INTEGER REFERENCES "Currency"(id), amount DOUBLE PRECISION, type VARCHAR(50)
       );
     `);
-    console.log('ตรวจสอบโครงสร้างตารางบนระบบคลาวด์เสร็จสิ้น');
 
     await client.query('TRUNCATE TABLE "Transfer", "Trade", "Order", "Wallet", "Currency", "User" CASCADE;');
-    console.log('ล้างข้อมูลเก่าเรียบร้อย');
-
 
     const resCurr = await client.query(`
       INSERT INTO "Currency" (code, type, precision) VALUES 
@@ -56,9 +50,7 @@ async function main() {
     
     const currMap = {};
     resCurr.rows.forEach(row => { currMap[row.code] = row.id; });
-    console.log('เพิ่มสกุลเงินสำเร็จ');
 
-    // 3. ยัดข้อมูลผู้ใช้ (Users)
     const resUser = await client.query(`
       INSERT INTO "User" (username, email, "passwordHash", "createdAt", "updatedAt") VALUES 
       ('somchai_crypto', 'somchai@example.com', 'hashed_password_123', NOW(), NOW()),
@@ -68,9 +60,7 @@ async function main() {
     
     const userMap = {};
     resUser.rows.forEach(row => { userMap[row.username] = row.id; });
-    console.log('เพิ่มผู้ใช้สมมติสำเร็จ');
 
-    // 4. เติมเงินใส่กระเป๋า (Wallets)
     await client.query(`
       INSERT INTO "Wallet" ("userId", "currencyId", balance, "frozenBalance") VALUES 
       (${userMap['somchai_crypto']}, ${currMap['THB']}, 500000.0, 0.0),
@@ -79,11 +69,8 @@ async function main() {
       (${userMap['john_doe']}, ${currMap['BTC']}, 2.5, 0.0);
     `);
 
-    console.log('เสกเงินเข้ากระเป๋าผู้ใช้สำเร็จ');
-    console.log('Seed ข้อมูลเสร็จสมบูรณ์!');
-
   } catch (err) {
-    console.error('เกิดข้อผิดพลาดตอน Seed ข้อมูล:', err);
+    process.exit(1);
   } finally {
     await client.end();
   }

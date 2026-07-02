@@ -8,31 +8,31 @@ generator client {
 
 // 1. ตารางผู้ใช้งาน
 model User {
-  id            Int            @id @default(autoincrement())
-  username      String         @unique
-  email         String         @unique
-  passwordHash  String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             Int        @id @default(autoincrement())
+  username       String     @unique
+  email          String     @unique
+  passwordHash   String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
   
-  wallets       Wallet[]
-  orders        Order[]
-  tradesAsBuyer Trade[]        @relation("BuyerTrades")
-  tradesAsSeller Trade[]       @relation("SellerTrades")
-  transfersSent Transfer[]     @relation("SenderTransfers")
-  transfersRecv Transfer[]     @relation("RecipientTransfers")
+  wallets        Wallet[]
+  orders         Order[]
+  tradesAsBuyer  Trade[]    @relation("BuyerTrades")
+  tradesAsSeller Trade[]    @relation("SellerTrades")
+  transfersSent  Transfer[] @relation("SenderTransfers")
+  transfersRecv  Transfer[] @relation("RecipientTransfers")
 }
 
 // 2. ตารางสกุลเงิน (Fiat / Crypto)
 model Currency {
-  id        Int          @id @default(autoincrement())
-  code      String       @unique // เช่น "THB", "USD", "BTC", "ETH"
-  type      CurrencyType
-  precision Int          @default(2) // จุดทศนิยม เช่น Fiat=2, BTC=8
+  id           Int          @id @default(autoincrement())
+  code         String       @unique // เช่น "THB", "USD", "BTC", "ETH"
+  type         CurrencyType
+  precision    Int          @default(2) // จุดทศนิยม เช่น Fiat=2, BTC=8
   
-  wallets   Wallet[]
-  ordersCrypto Order[]   @relation("CryptoCurrency")
-  ordersFiat   Order[]   @relation("FiatCurrency")
+  wallets      Wallet[]
+  ordersCrypto Order[]      @relation("CryptoCurrency")
+  ordersFiat   Order[]      @relation("FiatCurrency")
   transfers    Transfer[]
 }
 
@@ -43,14 +43,14 @@ enum CurrencyType {
 
 // 3. ตารางกระเป๋าเงิน (เก็บยอดเงินแยกตามสกุล)
 model Wallet {
-  id            Int       @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   userId        Int
   currencyId    Int
-  balance       Float     @default(0.0) // เงินที่พร้อมใช้
-  frozenBalance Float     @default(0.0) // เงินที่ถูกล็อกไว้ตอนตั้ง Order
+  balance       Float      @default(0.0) // เงินที่พร้อมใช้
+  frozenBalance Float      @default(0.0) // เงินที่ถูกล็อกไว้ตอนตั้ง Order
   
-  user          User      @relation(fields: [userId], references: [id])
-  currency      Currency  @relation(fields: [currencyId], references: [id])
+  user          User       @relation(fields: [userId], references: [id])
+  currency      Currency   @relation(fields: [currencyId], references: [id])
   transfers     Transfer[]
 
   @@unique([userId, currencyId]) // ผู้ใช้ 1 คน ห้ามมีกระเป๋าสกุลเงินเดียวกันซ้ำ
@@ -87,37 +87,37 @@ enum OrderStatus {
 
 // 5. ตารางประวัติการจับคู่ซื้อขาย
 model Trade {
-  id         Int         @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   orderId    Int
   buyerId    Int
   sellerId   Int
-  amount     Float       // จำนวนเหรียญที่ match กันรอบนี้
-  totalPrice Float       // ราคารวม (amount * pricePerUnit)
-  createdAt  DateTime    @default(now())
+  amount     Float    // จำนวนเหรียญที่ match กันรอบนี้
+  totalPrice Float    // ราคารวม (amount * pricePerUnit)
+  createdAt  DateTime @default(now())
   
-  order      Order       @relation(fields: [orderId], references: [id])
-  buyer      User        @relation("BuyerTrades", fields: [buyerId], references: [id])
-  seller     User        @relation("SellerTrades", fields: [sellerId], references: [id])
+  order      Order    @relation(fields: [orderId], references: [id])
+  buyer      User     @relation("BuyerTrades", fields: [buyerId], references: [id])
+  seller     User     @relation("SellerTrades", fields: [sellerId], references: [id])
 }
 
 // 6. ตารางบันทึกการโอนเงิน (Internal & External)
 model Transfer {
-  id                 Int          @id @default(autoincrement())
-  senderId           Int?         // เป็น Null ได้ถ้าเป็นการฝากเงินเข้าจากนอกระบบ
-  recipientId        Int?         // เป็น Null ได้ถ้าเป็นการถอนเงินออกไปนอกระบบ
+  id                 Int            @id @default(autoincrement())
+  senderId           Int?           // เป็น Null ได้ถ้าเป็นการฝากเงินเข้าจากนอกระบบ
+  recipientId        Int?           // เป็น Null ได้ถ้าเป็นการถอนเงินออกไปนอกระบบ
   walletId           Int
   currencyId         Int
   amount             Float
   type               TransferType
-  destinationAddress String?      // ที่อยู่กระเป๋าภายนอก (ถ้ามี)
-  txHash             String?      // Transaction Hash บน Blockchain (ถ้ามี)
+  destinationAddress String?        // ที่อยู่กระเป๋าภายนอก (ถ้ามี)
+  txHash             String?        // Transaction Hash บน Blockchain (ถ้ามี)
   status             TransferStatus @default(SUCCESS)
-  createdAt          DateTime     @default(now())
+  createdAt          DateTime       @default(now())
   
-  sender             User?        @relation("SenderTransfers", fields: [senderId], references: [id])
-  recipient          User?        @relation("RecipientTransfers", fields: [recipientId], references: [id])
-  wallet             Wallet       @relation(fields: [walletId], references: [id])
-  currency           Currency     @relation(fields: [currencyId], references: [id])
+  sender             User?          @relation("SenderTransfers", fields: [senderId], references: [id])
+  recipient          User?          @relation("RecipientTransfers", fields: [recipientId], references: [id])
+  wallet             Wallet         @relation(fields: [walletId], references: [id])
+  currency           Currency       @relation(fields: [currencyId], references: [id])
 }
 
 enum TransferType {

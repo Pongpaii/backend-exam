@@ -2,12 +2,8 @@ require('dotenv').config();
 
 const { defineConfig } = require('@prisma/config');
 
-module.exports = defineConfig({
+module.exports = {
   datasource: {
-    url: process.env.DATABASE_URL, 
-  },
-
-  migrations: {
-    seed: 'node ./prisma/seed.js',
-  },
-});
+    url: "postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+  }
+};

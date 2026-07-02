@@ -10,6 +10,8 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 const app = express();
+const cors = require('cors');
+app.use(cors());
 
 app.use(express.json());
 

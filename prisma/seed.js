@@ -1,9 +1,10 @@
-require('dotenv').config();
-const { Client } = require('pg');
+require("dotenv").config();
+const { Client } = require("pg");
 
 async function main() {
   const client = new Client({
-    connectionString: "postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres"
+    connectionString:
+      "postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres",
   });
 
   await client.connect();
@@ -35,8 +36,9 @@ async function main() {
       );
     `);
 
-    await client.query('TRUNCATE TABLE "Transfer", "Trade", "Order", "Wallet", "Currency", "User" CASCADE;');
-
+    await client.query(
+      'TRUNCATE TABLE "Transfer", "Trade", "Order", "Wallet", "Currency", "User" RESTART IDENTITY CASCADE;',
+    );
     const resCurr = await client.query(`
       INSERT INTO "Currency" (code, type, precision) VALUES 
       ('THB', 'FIAT', 2),
@@ -47,9 +49,11 @@ async function main() {
       ('DOGE', 'CRYPTO', 4)
       RETURNING id, code;
     `);
-    
+
     const currMap = {};
-    resCurr.rows.forEach(row => { currMap[row.code] = row.id; });
+    resCurr.rows.forEach((row) => {
+      currMap[row.code] = row.id;
+    });
 
     const resUser = await client.query(`
       INSERT INTO "User" (username, email, "passwordHash", "createdAt", "updatedAt") VALUES 
@@ -57,18 +61,19 @@ async function main() {
       ('john_doe', 'john@example.com', 'hashed_password_456', NOW(), NOW())
       RETURNING id, username;
     `);
-    
+
     const userMap = {};
-    resUser.rows.forEach(row => { userMap[row.username] = row.id; });
+    resUser.rows.forEach((row) => {
+      userMap[row.username] = row.id;
+    });
 
     await client.query(`
       INSERT INTO "Wallet" ("userId", "currencyId", balance, "frozenBalance") VALUES 
-      (${userMap['somchai_crypto']}, ${currMap['THB']}, 500000.0, 0.0),
-      (${userMap['somchai_crypto']}, ${currMap['BTC']}, 0.1, 0.0),
-      (${userMap['john_doe']}, ${currMap['THB']}, 1000.0, 0.0),
-      (${userMap['john_doe']}, ${currMap['BTC']}, 2.5, 0.0);
+      (${userMap["somchai_crypto"]}, ${currMap["THB"]}, 500000.0, 0.0),
+      (${userMap["somchai_crypto"]}, ${currMap["BTC"]}, 0.1, 0.0),
+      (${userMap["john_doe"]}, ${currMap["THB"]}, 1000.0, 0.0),
+      (${userMap["john_doe"]}, ${currMap["BTC"]}, 2.5, 0.0);
     `);
-
   } catch (err) {
     process.exit(1);
   } finally {

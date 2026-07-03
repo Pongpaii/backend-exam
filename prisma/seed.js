@@ -2,10 +2,9 @@ require("dotenv").config();
 const { Client } = require("pg");
 
 async function main() {
-  const client = new Client({
-    connectionString:
-      "postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres",
-  });
+ const client = new Client({
+  connectionString: process.env.SEED_DATABASE_URL,
+});
 
   await client.connect();
 

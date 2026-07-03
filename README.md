@@ -8,14 +8,11 @@ Built on **Node.js + Express**, backed by **PostgreSQL via Supabase**, with **Pr
 
 ## ⚠️ For Reviewers
 
-For security reasons, credentials have been **removed/masked** in the following files:
+This project no longer contains any hardcoded database credentials in `package.json`, `src/app.js`, or `prisma/seed.js` — all of them read the connection string from environment variables (`process.env.DATABASE_URL` / `process.env.SEED_DATABASE_URL`) via `dotenv`.
 
-- `.env`
-- `package.json`
-- `src/seed.js`
-- `src/app.js`
+**To run the project, create your own `.env` file** (see [Configure environment](#2-configure-environment) below) and request the actual connection string from the project owner. No credentials are committed to this repository or shared via this README.
 
-**Please use the credentials sent to you via email** and insert them into the files above before running the project. Without them, you will not be able to connect to the database or run the server.
+> **Security note:** an earlier version of this project had a live database credential hardcoded in the source and committed to git history. That credential has since been rotated and is no longer valid — do not attempt to reuse any connection string found in old commits.
 
 ---
 
@@ -47,16 +44,21 @@ npm install
 
 ### 2. Configure environment
 
-Create a `.env` file in the project root:
+Copy the template and fill in your own values:
 
-```env
-DATABASE_URL="postgresql://<user>:<password>@<host>:6543/postgres?pgbouncer=true"
-PORT=3000
+```bash
+cp .env.example .env
 ```
 
-> Grab the connection string from your Supabase project settings (`Database → Connection string → Transaction pooler`). Never commit the real `.env` file.
->
-> **Note:** The actual credentials for `.env`, `package.json`, `seed.js`, and `app.js` have been sent via email. Please replace the masked values in the code with them before running the project.
+```env
+PORT=3000
+DATABASE_URL="postgresql://<user>:<password>@<host>:6543/postgres?pgbouncer=true"
+SEED_DATABASE_URL="postgresql://<user>:<password>@<host>:5432/postgres"
+```
+
+> - `DATABASE_URL` — used by the app (`src/app.js`) via the pooled/pgbouncer connection on port `6543`. Grab it from your Supabase project settings (`Database → Connection string → Transaction pooler`).
+> - `SEED_DATABASE_URL` — used by the seed script (`prisma/seed.js`) via the direct connection on port `5432`, since `pgbouncer` doesn't support some DDL statements used during seeding.
+> - **`.env` is gitignored and must never be committed.** Do not hardcode connection strings anywhere in the source — always read them via `process.env.*`.
 
 ### 3. Generate the Prisma Client
 

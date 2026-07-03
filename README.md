@@ -6,6 +6,19 @@ Built on **Node.js + Express**, backed by **PostgreSQL via Supabase**, with **Pr
 
 ---
 
+## ⚠️ For Reviewers
+
+For security reasons, credentials have been **removed/masked** in the following files:
+
+- `.env`
+- `package.json`
+- `src/seed.js`
+- `src/app.js`
+
+**Please use the credentials sent to you via email** and insert them into the files above before running the project. Without them, you will not be able to connect to the database or run the server.
+
+---
+
 ## Stack
 
 | Layer | Choice |
@@ -15,6 +28,12 @@ Built on **Node.js + Express**, backed by **PostgreSQL via Supabase**, with **Pr
 | Database | PostgreSQL (Supabase) |
 | ORM | Prisma Client |
 | DB Driver | `pg` (node-postgres) + `@prisma/adapter-pg` |
+
+---
+
+## ER Diagram
+
+![ER Diagram](src/images/ER.jpeg)
 
 ---
 
@@ -36,6 +55,8 @@ PORT=3000
 ```
 
 > Grab the connection string from your Supabase project settings (`Database → Connection string → Transaction pooler`). Never commit the real `.env` file.
+>
+> **Note:** The actual credentials for `.env`, `package.json`, `seed.js`, and `app.js` have been sent via email. Please replace the masked values in the code with them before running the project.
 
 ### 3. Generate the Prisma Client
 
@@ -57,7 +78,7 @@ npx prisma db seed
 node src/app.js
 ```
 
-Server boots at **http://localhost:3000** 
+Server boots at **http://localhost:3000**
 
 ---
 
@@ -101,6 +122,22 @@ Moves funds between two users' wallets. Sender debit and receiver credit happen 
   "amount": 0.01
 }
 ```
+
+---
+
+## Troubleshooting
+
+### GET request returns `[]` even after seeding
+
+If you've run `npx prisma db seed` and `node src/app.js` successfully, but calling an endpoint via Postman returns an empty `[]`, check the data directly through one of the following methods:
+
+**Prisma Studio**
+
+```bash
+npx prisma studio
+```
+
+This opens a data management UI at `http://localhost:5555`, where you can inspect the `User`, `Wallet`, and `Currency` tables to confirm whether the seed data actually exists — and edit or add records directly from there if needed.
 
 ---
 

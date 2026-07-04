@@ -1,4 +1,5 @@
 require("dotenv").config();
+console.log("DEBUG SEED_DATABASE_URL:", process.env.SEED_DATABASE_URL);
 const { Client } = require("pg");
 
 async function main() {

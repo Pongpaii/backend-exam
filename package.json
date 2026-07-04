@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "$env:DATABASE_URL=\"postgresql://postgres.rmpjhtsntiktpmpwlljr:exambackend1234@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true\"; node src/app.js"
+    "start": "node src/app.js"
   },
   "keywords": [],
   "author": "",
